@@ -16,7 +16,7 @@ startGame();
 
 function startGame(){
     document.querySelector('.endgame').style.display='none';
-    origBoard = Array.from(Array(9).keys());//1-9 == 0-8
+    origBoard = Array.from(Array(9).keys());//0-8 || length:9  || has {1:"1",2:"2"..}
     for(var i = 0 ; i < cells.length ; i++){
         cells[i].innerText = '';
         cells[i].addEventListener('click', turnClick, false);
@@ -27,6 +27,7 @@ function turnClick(theEvent){
 }
 function turn(eventId , player){
     origBoard[eventId] = player;
+    // the board has Xs and Os
     document.getElementById(eventId).innerText = player;
     let gameWon = checkWinner(origBoard , player );
     if(gameWon){
@@ -34,11 +35,15 @@ function turn(eventId , player){
     }
 }
 function checkWinner(board , player){
-    let plays = board.reduce((a,element,index) =>
-    (element === player)  ? a.concat(index):a,[]);
-    //
+    // next line is to find the places in the board that has already played in
+    let plays = board.reduce((accumulator,element,index) =>
+    (element === player)  ? accumulator.concat(index):accumulator,[]);
+    // reduce -> goes through every element in  the board array
+    // return one single value which is an array that has all values and index or just values if the player is not same
     let gameWon = null;
+    //next line to check if someone has won
     for(let [index , win] of winCombos.entries()){
+        // taking one array in winCombos and check using every and > -1 if plays has the same index played on
         if (win.every(elem => plays.indexOf(elem) > -1)) {
             // has the player played in every spot that counts as win
             gameWon = {index: index ,player: player };
