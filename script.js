@@ -20,10 +20,16 @@ function startGame(){
     for(var i = 0 ; i < cells.length ; i++){
         cells[i].innerText = '';
         cells[i].addEventListener('click', turnClick, false);
+
     }
 }
 function turnClick(theEvent){
-    turn(theEvent.target.id , HUMAN);
+    if(typeof(origBoard[theEvent.target.id]) == 'number'){
+        turn(theEvent.target.id , HUMAN); // TODO: when i win it goes to not tie condition and overwrite in html
+        if(!checkTie()){
+            turn(bestSpot(),AI);
+        }
+    }
 }
 function turn(eventId , player){
     origBoard[eventId] = player;
@@ -52,20 +58,85 @@ function checkWinner(board , player){
     }
     return gameWon;
 }
-function howWon(gameWon){
-    if(gameWon.player == HUMAN){
-        return "You Won";
-    } else if (gameWon.player == AI) {
-        return "You Lost";
-    }else{
-        return "Draw !";
-    }
-}
+
 function gameOver(gameWon){
     document.querySelector('.endgame').style.display='block';
-    document.getElementById('text').innerText = howWon(gameWon);
+    document.getElementById('text').innerText = (gameWon.player == HUMAN)?"You Won":"You Lost";
     for (var i = 0 ; i < cells.length ; i++){
         cells[i].removeEventListener('click',turnClick, false);
     }
 
+}
+function emptySquares(){
+    return origBoard.filter( s => typeof(s) == 'number');
+}
+function bestSpot(){
+    return minimax(origBoard , AI).index;
+}
+function checkTie(){
+    if(emptySquares().length == 0){
+        for( var i = 0 ; i < cells.length ; i++  ){
+            cells[i].removeEventListener('click',turnClick, false);
+        }
+        document.getElementById('text').innerText = "Draw !";
+        return true;
+    }
+    return false;
+}
+// Minimax Algorithm
+
+function eveluation (player){
+    for(let [index , win] of winCombos.entries()){
+        if (win.every(elem => plays.indexOf(elem) > -1)){
+            if(player == HUMAN){ return 10;}
+            else if (player == AI) {return -10;}
+            else {return 0;}
+        }
+    }
+}
+function minimax( newBoard , player){
+    var availSpots = emptySquares(newBoard);
+    if(checkWinner(newBoard , HUMAN)){
+        return {score: -10};
+    }else if (checkWinner(newBoard , AI)){
+        return {score: 10};
+    }else if (availSpots.length === 0 ){
+        return {score: 0};
+    }
+    var moves = [];
+    for (var i = 0 ; i < availSpots.length ; i++){
+        var move = {};
+        move.index = newBoard[availSpots[i]];
+        newBoard[availSpots[i]] = player;
+
+// TODO: FIX MISSING CHANCE
+        if(player == AI){
+            var result = minimax(newBoard , HUMAN);
+            move.score = result.score;
+        }else{
+            var result = minimax(newBoard , AI);
+            move.score = result.score;
+        }
+        newBoard[availSpots[i]] = move.index;
+        moves.push(move);
+    }
+    var bestMove;
+    if(player == AI){
+        var bestScore = -Infinity ;
+        for(var i = 0 ; i < moves.length ; i++){
+            if(moves[i].score > bestScore){
+                bestScore = moves[i].score;
+                bestMove = i ;
+            }
+        }
+    }else{
+        var bestScore = Infinity;
+        for( var i = 0 ; i < moves.length ; i++){
+            if(moves[i].score < bestScore){
+                bestScore = moves[i].score;
+                bestMove = i ;
+            }
+        }
+    }
+    return moves[bestMove];
 }
