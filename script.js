@@ -78,24 +78,19 @@ function checkTie(){
         for( var i = 0 ; i < cells.length ; i++  ){
             cells[i].removeEventListener('click',turnClick, false);
         }
+        document.querySelector('.endgame').style.display='block';
         document.getElementById('text').innerText = "Draw !";
         return true;
     }
     return false;
 }
-// Minimax Algorithm
 
-function eveluation (player){
-    for(let [index , win] of winCombos.entries()){
-        if (win.every(elem => plays.indexOf(elem) > -1)){
-            if(player == HUMAN){ return 10;}
-            else if (player == AI) {return -10;}
-            else {return 0;}
-        }
-    }
-}
+
+
+// Minimax Algorithm
 function minimax( newBoard , player){
     var availSpots = emptySquares(newBoard);
+// | 1 |  Return a value if a terminal state is found
     if(checkWinner(newBoard , HUMAN)){
         return {score: -10};
     }else if (checkWinner(newBoard , AI)){
@@ -104,12 +99,13 @@ function minimax( newBoard , player){
         return {score: 0};
     }
     var moves = [];
+// | 2 |  Go through avaliable sopts on the board
     for (var i = 0 ; i < availSpots.length ; i++){
         var move = {};
         move.index = newBoard[availSpots[i]];
         newBoard[availSpots[i]] = player;
 
-// TODO: FIX MISSING CHANCE
+// | 3 |  Call the minimax function on each avaliable spot
         if(player == AI){
             var result = minimax(newBoard , HUMAN);
             move.score = result.score;
@@ -121,6 +117,7 @@ function minimax( newBoard , player){
         moves.push(move);
     }
     var bestMove;
+// | 4 |  Evaluate returning values from function calls
     if(player == AI){
         var bestScore = -Infinity ;
         for(var i = 0 ; i < moves.length ; i++){
@@ -138,5 +135,6 @@ function minimax( newBoard , player){
             }
         }
     }
+// | 5 |  and return the best value
     return moves[bestMove];
 }
