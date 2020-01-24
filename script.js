@@ -25,7 +25,7 @@ function startGame(){
 }
 function turnClick(theEvent){
     if(typeof(origBoard[theEvent.target.id]) == 'number'){
-        turn(theEvent.target.id , HUMAN); // TODO: when i win it goes to not tie condition and overwrite in html
+        turn(theEvent.target.id , HUMAN); 
         if(!checkTie()){
             turn(bestSpot(),AI);
         }
